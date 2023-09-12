@@ -1,9 +1,9 @@
 import firebase_admin
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from firebase_admin import credentials, firestore, auth
 from google.rpc.http_pb2 import HttpResponse
 
-from src.AdminFastAPIBackend.FirestoreClients.AdminFirestoreOperations import AdminFirestoreClient
+from src.ServerSideFrontendWave.AdminFirestoreOperations import AdminFirestoreClient
 from src.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -26,17 +26,9 @@ def verify_user_token(token):
                                 headers={"WWW-Authenticate": "Bearer"})
 
 
-@app.get("/verify_user/{token}")
-async def verify_user(token: str):
-    uid = verify_user_token(token)
-    return {"uid": uid}
-
-
 # add the routers
 from src.AdminFastAPIBackend.Routes import AdminManualRoutes
 
-# app.include_router(SportsRoutes.router)
-# app.include_router(MaintainenceRoutes.router)
 app.include_router(AdminManualRoutes.router)
 
 

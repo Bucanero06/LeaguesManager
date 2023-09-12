@@ -1,10 +1,9 @@
 
 '''Sports CRUD'''
-import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
 
-from src.AdminFastAPIBackend.BaseClasses.EntitiesBaseClasses import Sport
-from src.AdminFastAPIBackend.FirestoreClients.AdminFirestoreOperations import AdminFirestoreClient
+from src.BaseClasses.EntitiesBaseClasses import Sport
+from src.ServerSideFrontendWave.AdminFirestoreOperations import AdminFirestoreClient
 from src.logger import setup_logger
 # import route dependencies instead of creating an app
 from fastapi import APIRouter, HTTPException, Body

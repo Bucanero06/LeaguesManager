@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from firebase_admin import auth
 from google.oauth2.id_token import verify_firebase_token
 
-from src.AdminFastAPIBackend.BaseClasses.UsersBaseClasses import InputAppUser, OuputAppUser
+from src.BaseClasses.UsersBaseClasses import InputAppUser, OuputAppUser
 from src.logger import setup_logger
 
 router = APIRouter()

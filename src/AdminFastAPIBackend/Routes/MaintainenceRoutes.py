@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from firebase_admin import firestore
 
-from src.AdminFastAPIBackend.FirestoreClients.AdminFirestoreOperations import AdminFirestoreClient
+from src.ServerSideFrontendWave.AdminFirestoreOperations import AdminFirestoreClient
 from src.logger import setup_logger
 
 logger = setup_logger(__name__)

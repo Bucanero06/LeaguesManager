@@ -1,11 +1,10 @@
 '''Leagues CRUD'''
-import firebase_admin
 # import route dependencies instead of creating an app
 from fastapi import APIRouter, HTTPException, Body
 from firebase_admin import credentials, firestore
 
-from src.AdminFastAPIBackend.BaseClasses.EntitiesBaseClasses import League
-from src.AdminFastAPIBackend.FirestoreClients.AdminFirestoreOperations import AdminFirestoreClient
+from src.BaseClasses.EntitiesBaseClasses import League
+from src.ServerSideFrontendWave.AdminFirestoreOperations import AdminFirestoreClient
 from src.logger import setup_logger
 
 logger = setup_logger(__name__)

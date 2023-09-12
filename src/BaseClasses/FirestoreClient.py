@@ -2,7 +2,7 @@
 * Required method set_id is called in the __init__ method to set the id of the lowest level class
 * If attr is used in set_id required method, then the validator will be called before the id is set
     by using pre=True.
-* For general validation although not required the standard has been use root_validator where white spaces are removed
+* For general validation although not required the standard has been use model_validator where white spaces are removed
     from string or List[string] as well as validation of the status and rules fields
 
 """
@@ -17,7 +17,7 @@ from src.logger import setup_logger
 logger = setup_logger(__name__)
 
 
-class FirestoreClient:
+class AsyncPydanticFirestoreClient:
     """
     Client for interacting with Firestore for general CRUD operations.
 
@@ -62,7 +62,7 @@ class FirestoreClient:
         self.collection = db.collection(collection_name)
         self.model_cls = model_cls  # This will store reference to the specific model class like Team, Player etc.
 
-    def create(self, item: T, return_just_id: bool = False) -> Union[str, Tuple[str, T]]:
+    async def create(self, item: T, return_just_id: bool = False) -> Union[str, Tuple[str, T]]:
         """
         Create a new document in the Firestore collection. If the provided item has a `set_id` method, that method's
         return value will be used as the document's ID in Firestore. Otherwise, Firestore generates a random ID.
@@ -90,17 +90,20 @@ class FirestoreClient:
         if not isinstance(item, self.model_cls):
             raise TypeError(f"Item is of type {type(item)} but should be {self.model_cls}")
 
-        document_id = item.id  # Let Firestore generate ID if None is provided
-        document_ref = self.collection.document(document_id) # Fetch the document reference
-        item_data = item.dict(exclude_unset=False) # Get the data of the item as a dictionary
+        # Let Firestore generate ID if None is provided
+        document_ref = self.collection.document(item.id.value)  # Fetch the document reference
+
+        # Create the document in Firestore
+        item_data = item.dict(exclude_unset=False)  # Get the data of the item as a dictionary
         item_data.pop("id", None)  # Exclude the object id from the data since it should the same as the document id
-        document_ref.set(item_data) # Create the document in Firestore
-        print({'id': document_ref.id} | document_ref.get().to_dict())
-        item = self.model_cls(**({'id': document_ref.id} | document_ref.get().to_dict())) # Fetch the created document
+        document_ref.set(item_data)  # Create the document in Firestore
 
-        return item if not return_just_id == True else item.id
+        # Reconstruct the item with the updated model data
+        item = self.model_cls(**({'id': document_ref.id} | document_ref.get().to_dict()))  # Fetch the created document
+        assert item.id
+        return item if not return_just_id == True else item.id.value
 
-    def get(self, document_id: str) -> Optional[T]:
+    async def get(self, document_id: str) -> Optional[T]:
         """
         Fetch a document from the Firestore collection by its ID.
 
@@ -124,7 +127,7 @@ class FirestoreClient:
         item = self.model_cls(**({'id': document_ref.id} | document_ref.get().to_dict()))
         return item
 
-    def update(self, document_id: str, updated_data: dict):
+    async def update(self, document_id: str, updated_data: dict):
         """
         Update a specific document's data in the Firestore collection by its ID.
 
@@ -140,7 +143,7 @@ class FirestoreClient:
         item = self.model_cls(**({'id': document_ref.id} | document_ref.get().to_dict()))
         return item
 
-    def delete(self, document_id: str) -> dict:
+    async def delete(self, document_id: str) -> dict:
         """
         Delete or archive a document in a collection.
 
@@ -154,7 +157,7 @@ class FirestoreClient:
         document_ref.delete()
         return {"status": "deleted", "id": document_id}
 
-    def get_all(self) -> list[T]:
+    async def get_all(self) -> list[T]:
         """
         Fetch all documents from the Firestore collection.
 
@@ -176,7 +179,7 @@ class FirestoreClient:
 
         return items_list
 
-    def empty_collection(self):
+    async def empty_collection(self):
         """
         Deletes all documents from the Firestore collection. This operation is irreversible.
 
@@ -192,21 +195,21 @@ class FirestoreClient:
 
     # In the FirestoreClient class:
 
-    def add_to_batch(self, batch: firestore.WriteBatch, data: dict) -> firestore.WriteBatch:
+    async def add_to_batch(self, batch: firestore.WriteBatch, data: dict) -> firestore.WriteBatch:
         if not data:
             raise ValueError("Data is required for 'add' operation.")
         document_ref = self.collection.document()
         batch.set(document_ref, data)
         return batch
 
-    def update_to_batch(self, batch: firestore.WriteBatch, document_id: str, data: dict) -> firestore.WriteBatch:
+    async def update_to_batch(self, batch: firestore.WriteBatch, document_id: str, data: dict) -> firestore.WriteBatch:
         if not document_id or not data:
             raise ValueError("Document ID and data are required for 'update' operation.")
         document_ref = self.collection.document(document_id)
         batch.update(document_ref, data)
         return batch
 
-    def delete_from_batch(self, batch: firestore.WriteBatch, document_id: str) -> firestore.WriteBatch:
+    async def delete_from_batch(self, batch: firestore.WriteBatch, document_id: str) -> firestore.WriteBatch:
         if not document_id:
             raise ValueError("Document ID is required for 'delete' operation.")
         document_ref = self.collection.document(document_id)
