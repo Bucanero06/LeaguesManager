@@ -1,4 +1,3 @@
-import asyncio
 import inspect
 from typing import List
 
@@ -7,11 +6,11 @@ from h2o_wave import Q, ui, on, data, handle_on, AsyncSite  # noqa F401
 
 from src.BaseClasses.BaseClasses import FirestoreIDType
 from src.BaseClasses.RulesBaseClasses import BaseRules
-from src.ServerSideFrontendWave.Pages.AdminPages._mappings import ITEM_NAME_TO_PYDANTIC_MODEL_MAP, \
-    ITEM_NAME_TO_COLLECTION_NAME_MAPPING, LEAGUE_MANAGER_ITEM_NAME_LIST
 from src.ServerSideFrontendWave.firestore_update_models import load_page_recipe_with_update_models
-from src.ServerSideFrontendWave.util import clear_cards, add_card, push_notification_bar, stream_message
+from src.ServerSideFrontendWave.util import clear_cards, add_card, push_notification_bar
 from src.ServerSideFrontendWave.util import load_env_file
+from src._mappings import ITEM_NAME_TO_PYDANTIC_MODEL_MAP, \
+    ITEM_NAME_TO_COLLECTION_NAME_MAPPING, LEAGUE_MANAGER_ITEM_NAME_LIST
 
 load_env_file("/home/ruben/PycharmProjects/LeaguesManager/.env")
 
@@ -21,131 +20,135 @@ from src.ServerSideFrontendWave.AdminFirestoreOperations import AdminFirestoreCl
 admin_firestore_client = AdminFirestoreClient(db)
 app = AsyncSite()
 
+###!!!
+_idfoo = 0
+
+
+class Issue:
+    def __init__(self, text: str, status: str, progress: float, icon: str, state: str, created: str):
+        global _idfoo
+        _idfoo += 1
+        self.id = f'I{_idfoo}'
+        self.text = text
+        self.status = status
+        self.views = 0
+        self.progress = progress
+        self.icon = icon
+        self.created = created
+        self.state = state
+
+
+###!!!
 
 async def leagues_management_page(q: Q):
     # Clear all cards except the ones needed for this page
-    clear_cards(q,
-                # Optional[List[str]] # TODO change to page object naming convension e.g. {A (Admin) or U (User)}{PageName Initials}
-                ignore=['header_card', 'SportsLeaguesDropdowns', 'SeasonsDropdowns', 'CRUDOperations',
-                        "ALM_ChatBot_Area","first_context_1"]
-                )
+    await q.run(clear_cards, q, ignore=['Application_Sidebar'])
 
     '''Context - Data from Firestore'''
-
+    print(f'{q.app.sports_collection = }')
     '''Static Cards'''
     # Add header
-    add_card(q, 'header_card', ui.header_card(box='header', title='Leagues Management', subtitle='Admin',
-                                              # Color
-                                              color='transparent',
-                                              icon='MoreSports',
-                                              icon_color=None,
-                                              ))
-
-    '''Dynamic Cards'''
-    sports_choices = [ui.choice(name=sport_id, label=sport_id) for sport_id in
-                      q.app.sports_collection.keys()] if q.app.sports_collection else []
-    leagues_available_with_sport = [ui.choice(name=league_id, label=league_id) for league_id in  # TODO
-                                    q.app.leagues_collection.keys()] if q.app.leagues_collection else []
-    seasons_available_with_league = [ui.choice(name=season_id, label=season_id) for season_id in
-                                     q.app.seasons_collection.keys()] if q.app.seasons_collection else []
-    teams_available_with_season = [ui.choice(name=team_id, label=team_id) for team_id in
-                                   q.app.teams_collection.keys()] if q.app.teams_collection else []
-
-    # League Management Cards
-    add_card(q, 'CRUDOperations',
-             # Select league if not any created then create, if sport not created then create, etc...
-             ui.form_card(
-                 box='first_context_1',
-                 items=[
-                     ui.button(name='ALM_manual_commands_button', label='Manual Admin Commands', commands=[
-                         ui.command(name='ALM_manual_new_command', label='Add a New Item', items=[
-                             ui.command(name='ALM_manual_new_sport', label='Sport'),
-                             ui.command(name='ALM_manual_new_league', label='League'),
-                             ui.command(name='ALM_manual_new_season', label='Season'),
-                             ui.command(name='ALM_manual_new_team', label='Team'),
-                         ]),
-                         ui.command(name='ALM_manual_edit_command', label='Edit Items', items=[
-                             ui.command(name='ALM_manual_edit_copy_button', label='Start from an Item'),
-                             ui.command(name='ALM_manual_edit_original_button', label='Edit Original Item'),
-                         ]),
-                         ui.command(name='ALM_manual_erase_command', label='Other commands', items=[
-                             ui.command(name='ALM_manual_archive_button', label='Archive Item'),
-                             ui.command(name='ALM_manual_delete_button',
-                                        label='ANNIHILATE THIS Item OUT of Existence!'),
-                         ])
-                     ]),
-
-                     # ui.button(name='ALM_edit_operation', label='Edit', primary=False),
-                     # ui.button(name='ALM_drop_operation', label='Drop', primary=False),
-                     # # Reload the page
-                     # ui.button(name='ALM_reload_operation', label='Reload', primary=False),
-
-                 ]
-             )
-             )
-
-    add_card(q, 'SportsLeaguesDropdowns',
-             # Select league if not any created then create, if sport not created then create, etc...
-             ui.form_card(
-                 box='first_context_1',
-                 items=[
-                     ui.dropdown(name='sport', label='Start with a Sport', choices=sports_choices),
-                     ui.dropdown(name='league', label='These contain Leagues', choices=leagues_available_with_sport)
-                 ],
-
-             )
-             )
-
-    add_card(q, 'SeasonsDropdowns',
-             # Select league if not any created then create, if sport not created then create, etc...
-             ui.form_card(
-                 box='first_context_1',
-                 items=[
-                     ui.dropdown(name='seasons', label='Choose Seasons', choices=seasons_available_with_league),
-                     ui.dropdown(name='teams', label='Want to see Teams?', choices=teams_available_with_season),
-                 ]
-             )
-             )
-
-    add_card(
-        q, 'AML_ChatBot_Area', ui.chatbot_card(
+    add_card(q, 'ALM_Header', ui.header_card(box='header', title='Leagues Management', subtitle='Admin',
+                                             # Color
+                                             color='transparent',
+                                             icon='MoreSports',
+                                             icon_color=None,
+                                             ))
+    # Add header right
+    add_card(q, 'ALM_Commands', ui.form_card(
         box='first_context_1',
-        data=data(fields='content from_user', t='list'),
-        name='chatbot',
-        events=['stop']
-    )
-    )
+        items=[
+            ui.button(name='ALM_commands_button', label='Commands', commands=[
+                ui.command(name='ALM_new_item_command', label='New Item', items=[
+                    ui.command(name='ALM_new_sport', label='Sport'),
+                    ui.command(name='ALM_new_league', label='League'),
+                    ui.command(name='ALM_new_season', label='Season'),
+                    ui.command(name='ALM_new_team', label='Team'),
+                ]),
+                ui.command(name='ALM_edit_item_command', label='Edit Item', items=[
+                    ui.command(name='ALM_edit_copy_button', label='Start from an Item'),
+                    ui.command(name='ALM_edit_original_button', label='Edit Original Item'),
+                ]),
+                ui.command(name='ALM_erase_item_command', label='Delete Item', items=[
+                    ui.command(name='ALM_archive_button', label='Archive Item'),
+                    ui.command(name='ALM_delete_button',
+                               label='ANNIHILATE THIS Item OUT of Existence!'),
+                ])
+            ]),
 
-    print(f'dsffesf{q.args = }')
+            # ui.button(name='ALM_edit_operation', label='Edit', primary=False),
+            # ui.button(name='ALM_drop_operation', label='Drop', primary=False),
+            # # Reload the page
+            # ui.button(name='ALM_reload_operation', label='Reload', primary=False),
+
+        ]
+    ))
+    '''Dynamic Cards'''
+    #
+
+    if q.args.issues:
+        add_card(q, 'ALM_Main_Table',
+                 ui.form_card(box='grid', items=[
+                     ui.text(f'You clicked on: {q.args.issues}'),
+                     ui.button(name='back', label='Back'),
+                 ])
+                 )
+    else:
+        print(f'{q.app.sports_collection.items() = }')
+        # {'Soccer': {'status': 'inactive', 'name': 'Soccer'}, 'asfdewsd': {'status': 'inactive', 'name': 'asfdewsd'},
+        #  'dfs': {'status': 'inactive', 'name': 'dfs'}, 'sfeds': {'status': 'inactive', 'name': 'sfeds'}}
+
+        sports = [ui.table_row(
+            name=sport_id,
+            cells=[sport['name'], sport['status']]
+        ) for sport_id, sport in q.app.sports_collection.items()]
+        print(f'fhiseohf;W{sports = }')
+
+        columns = [
+            # (name: str,
+            # label: str,
+            # min_width: str | None = None,
+            # max_width: str | None = None,
+            # sortable: bool | None = None,
+            # searchable: bool | None = None,
+            # filterable: bool | None = None,
+            # link: bool | None = None,
+            # data_type: str | None = None,
+            # cell_type: TableCellType | None = None,
+            # cell_overflow: str | None = None,
+            # filters: list[str] | None = None,
+            # align: str | None = None)
+            ui.table_column(name='name', label='Name', sortable=True, searchable=True, max_width='300',
+                            cell_overflow='wrap'),
+            ui.table_column(name='status', label='Status', filterable=True),
+
+        ]
+
+        add_card(q, 'ALM_Main_Table',
+                 ui.form_card(box='grid', items=[
+                     ui.table(
+                         name='ALM_main_table_card',
+                         columns=columns,
+                         rows=sports,
+                         groupable=True,
+                         downloadable=True,
+                         resettable=True,
+                         height='600px'
+                     )
+                 ])
+                 )
 
 
-    # Handle the stop event.
-    if q.events.chatbot and q.events.chatbot.stop:
-        # Cancel the streaming task.
-        q.client.task.cancel()
-        # Hide the "Stop generating" button.
-        q.page['AML_ChatBot_Area'].generating = False
-    # A new message arrived.
-    elif q.args.chatbot:
-        # Append user message.
-        q.page['AML_ChatBot_Area'].data += [q.args.chatbot, True]
-        # Run the streaming within cancelable asyncio task.
-        q.client.task = asyncio.create_task(stream_message(q, 'AML_ChatBot_Area',
-                                                           message=f'You said: {q.client.AML_ChatBot_Area_initialized}'))
-
-
-
-
-
-@on("ALM_manual_new_command")
-@on("ALM_manual_new_sport")
-@on("ALM_manual_new_league")
-@on("ALM_manual_new_season")
-@on("ALM_manual_new_team")
-async def on_ALM_manual_new_command(q: Q):
-    # Use LEAGUE_MANAGER_ITEM_NAME_LIST to check which is True ALM_manual_new_{item_name} in q.args
+@on("ALM_new_item_command")
+@on("ALM_new_sport")
+@on("ALM_new_league")
+@on("ALM_new_season")
+@on("ALM_new_team")
+async def on_ALM_new_item_command(q: Q):
+    # Use LEAGUE_MANAGER_ITEM_NAME_LIST to check which is True ALM_new_{item_name} in q.args
+    new_item_type = None
     for item in LEAGUE_MANAGER_ITEM_NAME_LIST:
-        if q.args[f'ALM_manual_new_{item}']:
+        if q.args[f'ALM_new_{item}']:
             new_item_type = item
             break
 
@@ -196,9 +199,9 @@ async def on_ALM_manual_new_command(q: Q):
                         ui.textbox(name=field_name, label=field_name, required=field_info.is_required()))
 
         # Create wave form for user to fill in the fields
-        add_card(q, 'CRUDOperations',
+        add_card(q, 'ALM_Commands',
                  ui.form_card(
-                     box='first_context_3',
+                     box='first_context_1',
                      items=[
                                # Title of the form
                                ui.text_xl(f'Create New {new_item_type.capitalize()}'),
@@ -219,8 +222,6 @@ async def on_ALM_manual_new_command(q: Q):
                                     events=['dismissed'], name="global_notification_bar")
 
     await q.page.save()
-
-
 
 
 @on("ALM_back_to_operations")

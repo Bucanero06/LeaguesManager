@@ -24,7 +24,7 @@ async def admin_account_page(q: Q):
             dynamic_card={{dynamic_card_function}}, # Custom
         ), ... ]
     """
-    clear_cards(q)
+    await q.run(clear_cards, q, ignore=['Application_Sidebar'])
 
     '''Static Cards'''
     # Add header

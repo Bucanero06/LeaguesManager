@@ -1,10 +1,7 @@
-from typing import TypeVar, List
+from typing import TypeVar
 from firebase_admin import firestore
-from src.BaseClasses.EntitiesBaseClasses import Sport, Club, Team, League
-from src.BaseClasses.EventsBaseClasses import Season, Game
-from src.BaseClasses.UsersBaseClasses import Player
 from src.BaseClasses.FirestoreClient import AsyncPydanticFirestoreClient
-from src.ServerSideFrontendWave.Pages.AdminPages._mappings import LEAGUE_MANAGER_ITEM_NAME_LIST, \
+from src._mappings import LEAGUE_MANAGER_ITEM_NAME_LIST, \
     ITEM_NAME_TO_PYDANTIC_MODEL_MAP, \
     ITEM_NAME_TO_COLLECTION_NAME_MAPPING
 from src.logger import setup_logger

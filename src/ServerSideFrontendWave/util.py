@@ -63,6 +63,7 @@ def remove_card(q: Q, name: str) -> None:
 
 
 def add_card(q: Q, name, card) -> None:
+
     q.client.cards.add(name)
     q.page[name] = card
 
@@ -84,8 +85,10 @@ def clear_cards(q: Q, ignore: Optional[List[str]] = None) -> None:
     # Remove cards not in the ignore list
     for card_name in q.client.cards.copy():
         if card_name not in ignore:
-            del q.page[card_name]
-            q.client.cards.remove(card_name)
+            # del q.page[card_name]
+            # q.client.cards.remove(card_name)
+            remove_card(q, card_name)
+
 
 
 def load_env_file(env_path: str = '.env'):

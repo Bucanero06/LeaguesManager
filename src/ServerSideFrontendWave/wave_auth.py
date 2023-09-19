@@ -72,11 +72,14 @@ async def init(q: Q) -> None:
         commands
             Contextual menu commands for this component.
     """
+    # Static Business Website
+    # index_file = open('static/html/index.html', 'r').read()
+
     q.page['meta'] = ui.meta_card(box='',
                                   title='8CoedSports',
                                   layouts=[ui.layout(breakpoint='xs', min_height='100vh', zones=[
                                       ui.zone('main', size='1', direction=ui.ZoneDirection.ROW, zones=[
-                                          ui.zone('sidebar', size='250px'),
+                                          ui.zone('sidebar', size='208px'),
                                           ui.zone('body', zones=[
                                               ui.zone('header'),
                                               ui.zone('content', zones=[
@@ -129,23 +132,17 @@ async def init(q: Q) -> None:
 
                                   )
     # Sidebar should be initialized only with non-authenticated pages content only!!!
-    q.page['sidebar'] = ui.nav_card(
+    add_card(q, 'Application_Sidebar', ui.nav_card(
         box='sidebar', color='primary', title='Demo Admin App',
         subtitle="The team sports you loved as a kid... now all grown up.",
         # Local Image
         image='https://8coedsports.com/wp-content/uploads/2019/12/8coed-logo-color.svg',
         items=[]
-    )
-    q.page['header'] = ui.header_card(
-        box='header', title='', subtitle='',
-    )
+    ))
     q.page['footer'] = ui.footer_card(box='footer',
                                       caption='©2023 8CoedSports & Carbonyl LLC. Partnership. All rights reserved.')
 
     q.client.initialized = False
-    await render_hidden_content(q)
-
-
 
 
 async def initialize_client(q: Q):
@@ -221,7 +218,6 @@ def check_token_validity(idToken):
 async def render_login_page(q: Q, error_message=None):
     """Render the login page."""
 
-
     clear_cards(q)
 
     await init(q)
@@ -244,10 +240,10 @@ async def render_hidden_content(q: Q, context: dict = None):
     """
 
     # First clear all cards
-    await q.run(clear_cards, q)
+    await q.run(clear_cards, q, ignore=['Application_Sidebar'])
 
     # Then add the sidebar
-    q.page['sidebar'] = ui.nav_card(
+    add_card(q, 'Application_Sidebar', ui.nav_card(
         box='sidebar', color='primary', title='LeagueApp',
         subtitle="The team sports you loved as a kid... now all grown up.",
         value=f'#{q.args["#"]}' if q.args['#'] else '#homepage',
@@ -265,10 +261,10 @@ async def render_hidden_content(q: Q, context: dict = None):
                 ui.nav_item(name='logout', label='Logout', icon='Logout'),
             ]),
         ],
-    )
+    ))
 
     if q.args['#'] == 'homepage':
-        await load_page_recipe_with_update_models(q,homepage)
+        await load_page_recipe_with_update_models(q, homepage)
     elif q.args['#'] == 'admin_stripe_page':
         await load_page_recipe_with_update_models(q, admin_stripe_page)
     elif q.args["#"] == "admin_account_page":

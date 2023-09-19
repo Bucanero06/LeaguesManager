@@ -13,7 +13,7 @@ stripe.api_key = os.getenv("STRIPE_API_KEY")
 
 
 async def admin_plans_page(q: Q):
-    clear_cards(q)
+    await q.run(clear_cards, q, ignore=['Application_Sidebar'])
 
     '''Static Cards'''
     # Add header
