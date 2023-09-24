@@ -90,7 +90,7 @@ async def init(q: Q) -> None:
                                                               ui.zone('first_context_1', size='1 4 0 0'),
                                                               ui.zone('first_context_2', size='1 4 0 0'),
                                                               ui.zone('first_context_3', size='1 4 0 0'),
-                                                              ui.zone('first_context_3', size='1 4 0 0'),
+                                                              ui.zone('first_context_4', size='1 4 0 0'),
                                                           ]),
                                                   ui.zone('second_context', size='0 0 1 4',
                                                           direction=ui.ZoneDirection.ROW,
@@ -140,7 +140,7 @@ async def init(q: Q) -> None:
         items=[]
     ))
     q.page['footer'] = ui.footer_card(box='footer',
-                                      caption='©2023 8CoedSports & Carbonyl LLC. Partnership. All rights reserved.')
+                                      caption='©2023 8CoedSports & Carbonyl LLC. Partnership. All rights reserved.', )
 
     q.client.initialized = False
 
@@ -218,7 +218,7 @@ def check_token_validity(idToken):
 async def render_login_page(q: Q, error_message=None):
     """Render the login page."""
 
-    clear_cards(q)
+    await q.run(clear_cards, q, ignore=['Application_Sidebar'])
 
     await init(q)
 
@@ -255,11 +255,16 @@ async def render_hidden_content(q: Q, context: dict = None):
                 ui.nav_item(name='#admin_stripe_page', label='Admin Stripe', icon='FinancialMirroredSolid'),
                 ui.nav_item(name='#leagues_management_page', label='Leagues Management', icon='MoreSports'),
             ]),
+            ui.nav_group('Documentation', items=[
+                ui.nav_item(name='admin_userdocs_link', label='Usage Documentation', icon='AccountManagement'),
+                ui.nav_item(name='admin_devdocs_link', label='Codebase Documentation', icon='AccountManagement'),
+            ]),
             ui.nav_group('Account', items=[
                 ui.nav_item(name='#admin_account_page', label='Account', icon='AccountManagement'),
                 ui.nav_item(name='#admin_plans_page', label='Plans', icon='PaymentCard'),
                 ui.nav_item(name='logout', label='Logout', icon='Logout'),
             ]),
+
         ],
     ))
 
@@ -270,9 +275,19 @@ async def render_hidden_content(q: Q, context: dict = None):
     elif q.args["#"] == "admin_account_page":
         await load_page_recipe_with_update_models(q, admin_account_page)
     elif q.args["#"] == "admin_plans_page":
-        await load_page_recipe_with_update_models(q, admin_plans_page)
+        # q.page['meta'].redirect = 'http://localhost:8082/feda073f-0986-4468-b569-d209120343f6'
+        q.page['meta'].redirect = 'https://app.tooljet.com/applications/86fb2bde-e024-4169-8ed2-8a049878af82'
+        q.page.save()
+        # await load_page_recipe_with_update_models(q, admin_plans_page)
     elif q.args["#"] == 'leagues_management_page':
         await load_page_recipe_with_update_models(q, leagues_management_page)
+
+
+@on('admin_devdocs_link')
+async def admin_devdocs_link(q: Q):
+    q.page[
+        'meta'].redirect = ''
+    q.page.save()
 
 
 async def serve_security(q: Q):

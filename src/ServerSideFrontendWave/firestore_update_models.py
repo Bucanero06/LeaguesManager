@@ -71,7 +71,15 @@ from src.ServerSideFrontendWave._globals import module_global_collection_cache
 
 cache_lock = threading.Lock()
 
-db = firestore.client()
+try:
+    db = firestore.client()
+except Exception as e:
+    from firebase_admin import firestore, credentials, initialize_app
+
+    print(f'Error initializing Firestore client: {e}, retrying using credentials file...')
+    cred = credentials.Certificate("onlythemotivated-c2c2e-b5f9ea606b36.json")
+    db = firestore.client(app=initialize_app(cred))
+
 admin_firestore_client = AdminFirestoreClient(db)
 
 

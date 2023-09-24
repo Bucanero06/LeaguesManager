@@ -2,11 +2,11 @@ import os
 
 import firebase_admin
 from firebase_admin import credentials, firestore
-from h2o_wave import main, Q, app, ui, on, data, handle_on  # noqa F401
-
-from src.BaseClasses.FirestoreClient import AsyncPydanticFirestoreClient
+from h2o_wave import  Q, app, ui, on, data  # noqa F401
 from src.ServerSideFrontendWave.util import clear_cards, add_card, dynamic_tall_series_stat_card
 from src.ServerSideFrontendWave.util import load_env_file
+from src.BaseClasses.FirestoreClient import AsyncPydanticFirestoreClient
+
 
 load_env_file("/home/ruben/PycharmProjects/LeaguesManager/.env")
 
@@ -68,6 +68,7 @@ async def admin_stripe_page(q: Q):
     ))
 
 
+
     print(f'admin_stripe_balance_message: {admin_stripe_balance_message}')
 
     add_card(q, 'first_context_3', dynamic_tall_series_stat_card(
@@ -89,4 +90,25 @@ async def admin_stripe_page(q: Q):
     # # To stop listening
     # collection_watch.unsubscribe()
 
+    add_card(q, 'AS_Time_Range_Period', ui.form_card(
+        box='first_context_4',
+        items=[
+            ui.dropdown(
+                # def dropdown(name: str, label: Optional[str] = None, placeholder: Optional[str] = None, value: Optional[str] = None, values: Optional[List[str]] = None, choices: Optional[List[Choice]] = None, required: Optional[bool] = None, disabled: Optional[bool] = None, trigger: Optional[bool] = None, width: Optional[str] = None, visible: Optional[bool] = None, tooltip: Optional[str] = None, popup: Optional[str] = None) ‑> Component
+                name='Last Month',
+                choices=[
+                    ui.choice(name='AS_range_month_to_date_choice', label='Month-to-Date'),
+                    ui.choice(name='AS_range_quarter_to_date_choice', label='Quarter-to-Date'),
+                    ui.choice(name='AS_range_year_to_date_choice', label='Year-to-Date'),
+                ],
+                placeholder= 'Last Month',
+            )
+        ]
+    )
 
+    )
+
+@on('AS_range_month_to_date_choice')
+async def AS_range_month_to_date_choice(q: Q):
+    await q.page.save()
+    await admin_stripe_page(q)

@@ -20,25 +20,6 @@ from src.ServerSideFrontendWave.AdminFirestoreOperations import AdminFirestoreCl
 admin_firestore_client = AdminFirestoreClient(db)
 app = AsyncSite()
 
-###!!!
-_idfoo = 0
-
-
-class Issue:
-    def __init__(self, text: str, status: str, progress: float, icon: str, state: str, created: str):
-        global _idfoo
-        _idfoo += 1
-        self.id = f'I{_idfoo}'
-        self.text = text
-        self.status = status
-        self.views = 0
-        self.progress = progress
-        self.icon = icon
-        self.created = created
-        self.state = state
-
-
-###!!!
 
 async def leagues_management_page(q: Q):
     # Clear all cards except the ones needed for this page
@@ -54,6 +35,9 @@ async def leagues_management_page(q: Q):
                                              icon='MoreSports',
                                              icon_color=None,
                                              ))
+
+
+
     # Add header right
     add_card(q, 'ALM_Commands', ui.form_card(
         box='first_context_1',
@@ -83,7 +67,6 @@ async def leagues_management_page(q: Q):
 
         ]
     ))
-    '''Dynamic Cards'''
     #
 
     if q.args.issues:
@@ -121,7 +104,6 @@ async def leagues_management_page(q: Q):
             ui.table_column(name='name', label='Name', sortable=True, searchable=True, max_width='300',
                             cell_overflow='wrap'),
             ui.table_column(name='status', label='Status', filterable=True),
-
         ]
 
         add_card(q, 'ALM_Main_Table',

@@ -1,13 +1,14 @@
 import asyncio
 
-import firebase_admin
-from firebase_admin import firestore, credentials
 from h2o_wave import main, Q, app, ui, on, data, handle_on  # noqa F401
 
 # FIXME DELETE VVVVVVV
+from firebase_admin import firestore, credentials, initialize_app
 cred = credentials.Certificate("onlythemotivated-c2c2e-b5f9ea606b36.json")
-db = firestore.client(app=firebase_admin.initialize_app(cred))
+db = firestore.client(app=initialize_app(cred))
 # FIXME DELETE ^^^^^^^
+
+
 from src.ServerSideFrontendWave.wave_auth import initialize_client, render_hidden_content
 from src.ServerSideFrontendWave.firestore_update_models import update_models
 
