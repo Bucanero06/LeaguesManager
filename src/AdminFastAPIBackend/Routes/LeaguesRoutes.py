@@ -10,7 +10,7 @@ from src.logger import setup_logger
 logger = setup_logger(__name__)
 
 router = APIRouter()
-cred = credentials.Certificate("onlythemotivated-c2c2e-b5f9ea606b36.json")
+cred = credentials.Certificate("...")
 db = firestore.client()
 
 admin_firestore_client = AdminFirestoreClient(db=db)
