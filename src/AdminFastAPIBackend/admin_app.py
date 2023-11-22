@@ -9,7 +9,7 @@ from src.logger import setup_logger
 logger = setup_logger(__name__)
 
 app = FastAPI()
-cred = credentials.Certificate("onlythemotivated-c2c2e-b5f9ea606b36.json")
+cred = credentials.Certificate("...")
 db = firestore.client(app=firebase_admin.initialize_app(cred))
 admin_firestore_client = AdminFirestoreClient(db=db)
 
