@@ -27,7 +27,7 @@ FIREBASE_CONFIG = {
 
 
 # FIXME UNCOMMENT VVVVVVV
-# cred = credentials.Certificate("onlythemotivated-c2c2e-b5f9ea606b36.json")
+# cred = credentials.Certificate("...")
 # db = firestore.client(app=firebase_admin.initialize_app(cred))
 # FIXME UNCOMMENT ^^^^^^^
 
