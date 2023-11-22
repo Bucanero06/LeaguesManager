@@ -4,7 +4,7 @@ from h2o_wave import main, Q, app, ui, on, data, handle_on  # noqa F401
 
 # FIXME DELETE VVVVVVV
 from firebase_admin import firestore, credentials, initialize_app
-cred = credentials.Certificate("onlythemotivated-c2c2e-b5f9ea606b36.json")
+cred = credentials.Certificate("...")
 db = firestore.client(app=initialize_app(cred))
 # FIXME DELETE ^^^^^^^
 
